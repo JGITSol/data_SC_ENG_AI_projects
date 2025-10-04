@@ -1,0 +1,10 @@
+node_modules/
+dist/
+*.min.js
+*.min.css
+package-lock.json
+.env
+.env.local
+.env.production
+.env.development
+wrangler.toml

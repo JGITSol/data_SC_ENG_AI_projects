@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  dagster:
+    build: .
+    container_name: nyc-taxi-dagster
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./src:/app/src
+      - ./dbt_project:/app/dbt_project
+      - ./data:/app/data
+      - ./config:/app/config
+    environment:
+      - DAGSTER_HOME=/app
+      - PYTHONPATH=/app
+    command: dagster dev -h 0.0.0.0 -p 3000
+    networks:
+      - data-pipeline
+
+networks:
+  data-pipeline:
+    driver: bridge

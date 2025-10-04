@@ -1,0 +1,56 @@
+{
+  "name": "poland-weather-lake",
+  "version": "1.0.0",
+  "description": "Cloudflare-native weather data pipeline for Polish cities",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "dev:wrangler": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:create": "wrangler d1 create weather-db",
+    "db:migrate": "wrangler d1 execute weather-db --file=./schema.sql",
+    "db:migrate-local": "wrangler d1 execute weather-db --local --file=./schema.sql",
+    "pages:deploy": "wrangler pages deploy pages",
+    "start": "node server.js",
+    "lint": "eslint src/**/*.ts *.js",
+    "lint:fix": "eslint src/**/*.ts *.js --fix",
+    "format": "prettier --write \"**/*.{ts,js,json,css,html}\"",
+    "type-check": "tsc --noEmit",
+    "check-all": "npm run type-check && npm run lint && npm run format",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "*.{ts,js}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,css,html}": [
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240208.0",
+    "@eslint/js": "^9.34.0",
+    "@typescript-eslint/eslint-plugin": "^8.42.0",
+    "@typescript-eslint/parser": "^8.42.0",
+    "eslint": "^9.34.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.6",
+    "prettier": "^3.6.2",
+    "typescript": "^5.0.0",
+    "wrangler": "^4.34.0"
+  },
+  "keywords": [
+    "cloudflare",
+    "weather",
+    "data-engineering",
+    "d1",
+    "r2",
+    "workers"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

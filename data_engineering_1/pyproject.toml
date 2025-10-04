@@ -1,0 +1,29 @@
+[project]
+name = "nyc-taxi-analytics-pipeline"
+version = "1.0.0"
+description = "Production-grade data engineering pipeline for NYC Taxi data."
+authors = ["Your Name <your.email@example.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.optional-dependencies]
+dev = [
+    "dagster",
+    "dbt-core",
+    "duckdb",
+    "pytest",
+    "ruff",
+    "black",
+    "mypy",
+    "pre-commit",
+    "structlog",
+    "pandas",
+    "pydantic"
+]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"

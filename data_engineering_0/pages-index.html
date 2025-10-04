@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Poland Weather Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <header>
+      <h1>🌤️ Poland Weather Data Lake</h1>
+      <p>Real-time weather data for Polish cities via Open-Meteo API</p>
+    </header>
+
+    <main>
+      <section class="controls">
+        <div class="city-selector">
+          <label for="city-select">Select City:</label>
+          <select id="city-select">
+            <option value="">Loading cities...</option>
+          </select>
+        </div>
+
+        <div class="view-tabs">
+          <button class="tab-btn active" data-tab="current">Current</button>
+          <button class="tab-btn" data-tab="hourly">24h Hourly</button>
+          <button class="tab-btn" data-tab="daily">7-day Daily</button>
+          <button class="tab-btn" data-tab="lineage">Data Lineage</button>
+        </div>
+      </section>
+
+      <section class="content">
+        <!-- Current Weather Tab -->
+        <div id="current-tab" class="tab-content active">
+          <div class="weather-card">
+            <div id="current-loading" class="loading">
+              Select a city to view current weather
+            </div>
+            <div id="current-data" class="weather-info" style="display: none">
+              <div class="main-temp"><span id="current-temp">--</span>°C</div>
+              <div class="weather-details">
+                <div class="detail">
+                  <span class="label">Humidity:</span>
+                  <span id="current-humidity">--%</span>
+                </div>
+                <div class="detail">
+                  <span class="label">Wind Speed:</span>
+                  <span id="current-wind">-- m/s</span>
+                </div>
+                <div class="detail">
+                  <span class="label">Precipitation:</span>
+                  <span id="current-precip">-- mm</span>
+                </div>
+                <div class="detail">
+                  <span class="label">Last Updated:</span>
+                  <span id="current-timestamp">--</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hourly Weather Tab -->
+        <div id="hourly-tab" class="tab-content">
+          <div id="hourly-loading" class="loading">
+            Select a city to view hourly forecast
+          </div>
+          <div id="hourly-data" style="display: none">
+            <div class="table-container">
+              <table id="hourly-table">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Temp (°C)</th>
+                    <th>Humidity (%)</th>
+                    <th>Wind (m/s)</th>
+                    <th>Precip (mm)</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Daily Weather Tab -->
+        <div id="daily-tab" class="tab-content">
+          <div id="daily-loading" class="loading">
+            Select a city to view daily forecast
+          </div>
+          <div id="daily-data" style="display: none">
+            <div class="table-container">
+              <table id="daily-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Min Temp (°C)</th>
+                    <th>Max Temp (°C)</th>
+                    <th>Precip (mm)</th>
+                    <th>Max Wind (m/s)</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Lineage Tab -->
+        <div id="lineage-tab" class="tab-content">
+          <div class="lineage-info">
+            <h3>Data Pipeline Status</h3>
+            <div class="status-grid">
+              <div class="status-item">
+                <span class="label">Last Ingestion:</span>
+                <span id="last-ingest">Loading...</span>
+              </div>
+              <div class="status-item">
+                <span class="label">API Source:</span>
+                <span>Open-Meteo Forecast API</span>
+              </div>
+              <div class="status-item">
+                <span class="label">Storage:</span>
+                <span>Cloudflare D1 + R2</span>
+              </div>
+              <div class="status-item">
+                <span class="label">Update Frequency:</span>
+                <span>Hourly</span>
+              </div>
+            </div>
+
+            <div class="pipeline-diagram">
+              <div class="step">
+                <div class="step-icon">🌐</div>
+                <div class="step-text">Open-Meteo API</div>
+              </div>
+              <div class="arrow">→</div>
+              <div class="step">
+                <div class="step-icon">⚡</div>
+                <div class="step-text">Workers Ingestion</div>
+              </div>
+              <div class="arrow">→</div>
+              <div class="step">
+                <div class="step-icon">💾</div>
+                <div class="step-text">Raw Storage (R2)</div>
+              </div>
+              <div class="arrow">→</div>
+              <div class="step">
+                <div class="step-icon">🗃️</div>
+                <div class="step-text">Curated Data (D1)</div>
+              </div>
+              <div class="arrow">→</div>
+              <div class="step">
+                <div class="step-icon">📊</div>
+                <div class="step-text">API & Dashboard</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        Built with Cloudflare Workers, D1, R2 & Pages | Data from Open-Meteo API
+      </p>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>

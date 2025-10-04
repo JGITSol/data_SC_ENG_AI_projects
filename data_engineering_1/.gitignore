@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Virtual environments
+venv
+venv/
+.env
+
+# Data files
+/data/
+*.parquet
+*.csv
+*.json
+*.db
+*.sqlite
+
+# dbt
+/dbt_project/target/
+/dbt_project/dbt_packages/
+
+# Dagster
+.dagster/
+
+# Editor
+.vscode/
+
+# Coverage & test
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Build
+build/
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
