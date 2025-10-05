@@ -14,8 +14,53 @@ export async function onRequestGet(context) {
         return await compareCities(env, url.searchParams);
       case 'poland-vs-eu':
         return await getPolandVsEU(env);
+        case 'poland-gdp':
+          return await getPolandGDP(env);
       default:
         return new Response('Not Found', { status: 404 });
+// Pobieranie PKB na mieszkańca dla Polski z World Bank API z cache'owaniem w KV
+async function getPolandGDP(env) {
+  const KV_KEY = 'worldbank_gdp_per_capita_PL';
+  // Sprawdź cache
+  const cached = env.KV_NS && await env.KV_NS.get(KV_KEY);
+  if (cached) {
+    return new Response(cached, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=3600'
+      }
+    });
+  }
+  // Pobierz z World Bank API
+  try {
+    const apiUrl = 'https://api.worldbank.org/v2/country/PL/indicator/NY.GDP.PCAP.CD?format=json&date=2022';
+    const resp = await fetch(apiUrl);
+    if (!resp.ok) throw new Error('World Bank API error');
+    const data = await resp.json();
+    // Sprawdź strukturę odpowiedzi
+    const value = data?.[1]?.[0]?.value;
+    const year = data?.[1]?.[0]?.date;
+    if (!value || !year) throw new Error('No GDP data');
+    const result = JSON.stringify({
+      country: 'Poland',
+      year,
+      gdp_per_capita_usd: value
+    });
+    // Zapisz do cache na 1h
+    if (env.KV_NS) await env.KV_NS.put(KV_KEY, result, { expirationTtl: 3600 });
+    return new Response(result, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=3600'
+      }
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: 'Failed to fetch GDP data' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}
     }
   } catch (error) {
     console.error('Cost living API error:', error);

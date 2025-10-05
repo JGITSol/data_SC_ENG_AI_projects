@@ -1,0 +1,10 @@
+flask
+pytest
+ruff
+black
+mypy
+pre-commit
+mlflow
+duckdb
+pandas
+scikit-learn

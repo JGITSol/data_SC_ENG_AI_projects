@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  dashboard:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./src:/app/src
+      - ./data:/app/data
+      - ./config:/app/config
+    environment:
+      - DASHBOARD_ENV=local
+    command: python src/app.py
+    networks:
+      - ds-pipeline
+  db:
+    image: duckdb/duckdb:latest
+    ports:
+      - "9000:9000"
+    volumes:
+      - duckdbdata:/data
+    networks:
+      - ds-pipeline
+  mlflow:
+    image: mlflow/mlflow:latest
+    ports:
+      - "5000:5000"
+    environment:
+      - MLFLOW_TRACKING_URI=http://localhost:5000
+    networks:
+      - ds-pipeline
+volumes:
+  duckdbdata:
+networks:
+  ds-pipeline:
+    driver: bridge

@@ -12,20 +12,31 @@
     "db:create": "wrangler d1 create poland-living-standards",
     "db:migrate": "wrangler d1 execute poland-living-standards --file=./database-schema.sql",
     "db:migrate-local": "wrangler d1 execute poland-living-standards --local --file=./database-schema.sql",
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "mocha tests/integration/*.js"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240208.0",
     "@vue/cli-service": "^5.0.0",
     "typescript": "^5.0.0",
     "vue": "^3.0.0",
-    "wrangler": "^3.0.0"
+    "wrangler": "^3.0.0",
+    "mocha": "^10.0.0"
   },
   "dependencies": {
     "chart.js": "^4.0.0",
+    "node-fetch": "^3.3.2",
     "vue-chartjs": "^5.0.0"
   },
-  "keywords": ["cloudflare", "data-science", "poland", "quality-of-life", "vue", "d1", "pages"],
+  "keywords": [
+    "cloudflare",
+    "data-science",
+    "poland",
+    "quality-of-life",
+    "vue",
+    "d1",
+    "pages"
+  ],
   "author": "Your Name",
   "license": "MIT"
 }

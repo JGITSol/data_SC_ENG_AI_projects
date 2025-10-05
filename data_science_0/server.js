@@ -1,10 +1,41 @@
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
+import http from 'http';
+import fs from 'fs';
+import path from 'path';
 
 const PORT = 3002;
 
 const server = http.createServer((req, res) => {
+    // Obsługa endpointu /api/poland-gdp
+    if (req.url.startsWith('/api/poland-gdp')) {
+        // Prosty cache w pamięci na 1h
+        if (!global._gdpCache) global._gdpCache = { value: null, timestamp: 0 };
+        const now = Date.now();
+        if (global._gdpCache.value && now - global._gdpCache.timestamp < 3600 * 1000) {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(global._gdpCache.value);
+            return;
+        }
+        fetch('https://api.worldbank.org/v2/country/PL/indicator/NY.GDP.PCAP.CD?format=json&date=2022')
+            .then(apiRes => apiRes.json())
+            .then(data => {
+                const value = data?.[1]?.[0]?.value;
+                const year = data?.[1]?.[0]?.date;
+                if (!value || !year) {
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'No GDP data' }));
+                    return;
+                }
+                const result = JSON.stringify({ country: 'Poland', year, gdp_per_capita_usd: value });
+                global._gdpCache = { value: result, timestamp: now };
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(result);
+            })
+            .catch(() => {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Failed to fetch GDP data' }));
+            });
+        return;
+    }
     // Set CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');

@@ -1,0 +1,28 @@
+[project]
+name = "sota-ds-portfolio"
+version = "1.0.0"
+description = "SOTA data science portfolio project with ML pipeline, dashboard, and experiment tracking."
+authors = ["Your Name <your.email@example.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.optional-dependencies]
+dev = [
+    "flask",
+    "pytest",
+    "ruff",
+    "black",
+    "mypy",
+    "pre-commit",
+    "mlflow",
+    "duckdb",
+    "pandas",
+    "scikit-learn"
+]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
