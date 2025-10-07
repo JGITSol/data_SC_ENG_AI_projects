@@ -6,6 +6,8 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     build-essential \
     git \
+    procps \
+    net-tools \
     && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml ./
@@ -23,5 +25,6 @@ COPY config/ ./config/
 RUN mkdir -p data/raw data/processed
 
 EXPOSE 3000
+EXPOSE 8000
 
-CMD ["sh", "-c", "dagster dev -h 0.0.0.0 -p 3001 & python src/web_health.py"]
+ENTRYPOINT bash -c "dagster dev -h 0.0.0.0 -p 3000 & python src/web_health.py"
