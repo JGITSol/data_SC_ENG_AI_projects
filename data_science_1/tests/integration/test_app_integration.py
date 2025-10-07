@@ -5,6 +5,9 @@ Covers app startup, endpoint responses, and error handling for src/app.py.
 from multiprocessing import Process
 import time
 import requests
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 from src.app import app
 
 def run_app():

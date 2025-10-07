@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "name": "poland-living-dashboard",
   "version": "1.0.0",
   "description": "A comprehensive data science portfolio project comparing Poland's living standards with the rest of Europe",

@@ -2,6 +2,9 @@
 Industry-standard unit test suite for Flask dashboard app.
 Covers all endpoints and error handling for src/app.py.
 """
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 from src.app import app
 
 def test_health_endpoint():

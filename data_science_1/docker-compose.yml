@@ -22,15 +22,19 @@ services:
     networks:
       - ds-pipeline
   mlflow:
-    image: mlflow/mlflow:latest
+    image: ghcr.io/mlflow/mlflow:latest
     ports:
       - "5000:5000"
     environment:
       - MLFLOW_TRACKING_URI=http://localhost:5000
+    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri /data/mlflow
+    volumes:
+      - mlflowdata:/data/mlflow
     networks:
       - ds-pipeline
 volumes:
   duckdbdata:
+  mlflowdata:
 networks:
   ds-pipeline:
     driver: bridge

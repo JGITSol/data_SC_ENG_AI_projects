@@ -5,6 +5,12 @@ import path from 'path';
 const PORT = 3002;
 
 const server = http.createServer((req, res) => {
+    // Industry-standard health endpoint
+    if (req.url === '/health') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ status: 'ok' }));
+        return;
+    }
     // Obsługa endpointu /api/poland-gdp
     if (req.url.startsWith('/api/poland-gdp')) {
         // Prosty cache w pamięci na 1h
