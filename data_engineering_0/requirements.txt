@@ -1,0 +1,12 @@
+dagster
+dbt-core
+duckdb
+pytest
+ruff
+black
+mypy
+pre-commit
+structlog
+pandas
+pydantic
+pyarrow

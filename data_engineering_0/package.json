@@ -18,7 +18,6 @@
     "format": "prettier --write \"**/*.{ts,js,json,css,html}\"",
     "type-check": "tsc --noEmit",
     "check-all": "npm run type-check && npm run lint && npm run format",
-    "prepare": "husky install",
     "test": "mocha tests/integration/*.js"
   },
   "lint-staged": {
@@ -38,7 +37,6 @@
     "eslint": "^9.34.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
-    "husky": "^9.1.7",
     "lint-staged": "^16.1.6",
     "mocha": "^10.0.0",
     "prettier": "^3.6.2",
