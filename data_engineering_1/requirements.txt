@@ -1,4 +1,7 @@
 dagster
+dagster-webserver
+fastapi
+uvicorn
 dbt-core
 duckdb
 pytest
