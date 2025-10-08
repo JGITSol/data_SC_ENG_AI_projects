@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pandas
+sqlalchemy
+psycopg2-binary
+kafka-python
+redis
+pytest
+pytest-cov
+dbt-core
+airflow

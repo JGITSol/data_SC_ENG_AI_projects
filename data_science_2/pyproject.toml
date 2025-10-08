@@ -1,0 +1,19 @@
+[project]
+name = "data_science_2"
+version = "0.1.0"
+description = "Predictive Analytics Platform for Urban Quality of Life"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pandas",
+    "numpy",
+    "scikit-learn",
+    "xgboost",
+    "mlflow",
+    "pytest",
+    "pytest-cov",
+    "plotly"
+]
