@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urban Quality of Life Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Urban Quality of Life Analytics</h1>
+        <nav>
+            <a href="#overview">Overview</a>
+            <a href="#predict">Predict</a>
+            <a href="#eda">EDA</a>
+            <a href="#about">About</a>
+        </nav>
+    </header>
+    <main>
+        <section id="overview">
+            <h2>Project Overview</h2>
+            <p>This dashboard visualizes urban quality of life metrics and enables predictive analytics using the API.</p>
+        </section>
+        <section id="predict">
+            <h2>Model Prediction</h2>
+            <form id="predict-form">
+                <label>Feature 0: <input type="number" name="feature_0" required></label>
+                <label>Feature 1: <input type="number" name="feature_1" required></label>
+                <label>Feature 2: <input type="number" name="feature_2" required></label>
+                <label>Feature 3: <input type="number" name="feature_3" required></label>
+                <label>Feature 4: <input type="number" name="feature_4" required></label>
+                <button type="submit">Predict</button>
+            </form>
+            <div id="prediction-result"></div>
+        </section>
+        <section id="eda">
+            <h2>Exploratory Data Analysis</h2>
+            <div id="eda-plot"></div>
+        </section>
+        <section id="about">
+            <h2>About</h2>
+            <p>Created for SOTA portfolio. Powered by FastAPI, scikit-learn, Docker, and modern UI best practices.</p>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 Urban Quality of Life Analytics</p>
+    </footer>
+    <script src="dashboard.js"></script>
+</body>
+</html>
