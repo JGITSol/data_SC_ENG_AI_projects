@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+kafka-python
+pandas
+psycopg2-binary
+redis
+boto3
+pytest
+pytest-cov

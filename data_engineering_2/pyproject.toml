@@ -2,7 +2,9 @@
 name = "data_engineering_2"
 version = "0.1.0"
 description = "Real-Time Data Pipeline for Urban Mobility Analytics"
-authors = ["Your Name <your.email@example.com>"]
+authors = [
+    { name = "Your Name", email = "your.email@example.com" }
+]
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -18,3 +20,7 @@ dependencies = [
     "dbt-core",
     "airflow"
 ]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

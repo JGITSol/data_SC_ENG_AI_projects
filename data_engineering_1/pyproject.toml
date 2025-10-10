@@ -30,3 +30,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.dagster]
 module_name = "src.orchestration.assets"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

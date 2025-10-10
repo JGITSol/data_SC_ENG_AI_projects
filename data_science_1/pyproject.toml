@@ -2,7 +2,9 @@
 name = "sota-ds-portfolio"
 version = "1.0.0"
 description = "SOTA data science portfolio project with ML pipeline, dashboard, and experiment tracking."
-authors = ["Your Name <your.email@example.com>"]
+authors = [
+    { name = "Your Name", email = "your.email@example.com" }
+]
 license = "MIT"
 readme = "README.md"
 
@@ -26,3 +28,7 @@ dev = [
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
