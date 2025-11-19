@@ -1,39 +1,105 @@
 version: '3.8'
+
 services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - mobility-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9093,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    networks:
+      - mobility-network
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: mobility
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - mobility-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   api:
     build: .
     ports:
       - "8000:8000"
     environment:
-      - KAFKA_BROKER=kafka:9092
-      - POSTGRES_HOST=postgres
-      - REDIS_HOST=redis
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9093
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mobility
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - mobility-network
+
+  producer:
+    build: .
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9093
     depends_on:
       - kafka
-      - postgres
-      - redis
-  kafka:
-    image: bitnami/kafka:latest
-    ports:
-      - "9092:9092"
+    command: python -m src.kafka_producer --bootstrap-servers kafka:9093 --rate 5
+    networks:
+      - mobility-network
+    restart: unless-stopped
+
+  consumer:
+    build: .
     environment:
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-      - ALLOW_PLAINTEXT_LISTENER=yes
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9093
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mobility
+      DB_USER: postgres
+      DB_PASSWORD: postgres
     depends_on:
-      - zookeeper
-  zookeeper:
-    image: bitnami/zookeeper:latest
-    ports:
-      - "2181:2181"
-  postgres:
-    image: postgres:15
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: mobility
-    ports:
-      - "5432:5432"
-  redis:
-    image: redis:7
-    ports:
-      - "6379:6379"
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    command: python -m src.kafka_consumer --bootstrap-servers kafka:9093
+    networks:
+      - mobility-network
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+
+networks:
+  mobility-network:
+    driver: bridge
