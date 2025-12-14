@@ -1,0 +1,31 @@
+name = "poland-weather-lake"
+main = "src/index.ts"
+compatibility_date = "2024-09-02"
+
+# Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "weather-db"
+database_id = "your-d1-database-id"
+
+# R2 bucket binding  
+[[r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "weather-snapshots"
+
+# KV namespace binding
+[[kv_namespaces]]
+binding = "KV_NS"
+id = "your-kv-namespace-id"
+
+# Scheduled triggers (hourly weather collection)
+[triggers]
+crons = ["0 * * * *"]
+
+# Environment variables
+[vars]
+WORKER_HOST = "poland-weather-lake.your-subdomain.workers.dev"
+
+# Pages configuration for dashboard
+[pages]
+build_output_dir = "pages"

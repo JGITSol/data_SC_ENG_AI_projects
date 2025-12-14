@@ -1,29 +1,23 @@
-# Contributing to SOTA Data Science Portfolio
+# Contributing
 
-Thank you for your interest in contributing!
+Thank you for your interest in this project! This is a portfolio project, but contributions or suggestions are welcome.
 
 ## How to Contribute
 
-1. Fork the repository and create your feature branch.
-2. Write clear, well-documented code and tests.
-3. Run `make lint`, `make test`, and `make type-check` before submitting.
-4. Submit a pull request with a detailed description.
+1.  **Fork the repository**
+2.  **Create a feature branch** (`git checkout -b feature/amazing-feature`)
+3.  **Commit your changes** (`git commit -m 'Add some amazing feature'`)
+4.  **Push to the branch** (`git push origin feature/amazing-feature`)
+5.  **Open a Pull Request**
 
-## Code Standards
-- Use type hints and docstrings.
-- Follow PEP8 and Black formatting.
-- Use semantic commit messages.
-- Add unit and integration tests for new features.
+## Development Setup
 
-## Roadmap
-- Modular ML pipeline
-- Dashboard for analytics
-- MLflow experiment tracking
-- CI/CD pipeline
-- Advanced ML models (planned)
-- Real-time inference API (planned)
-- Interactive analytics dashboard (planned)
+1.  Clone the repo
+2.  Install dependencies (`pip install -r requirements.txt`)
+3.  Run tests (`pytest`)
 
-## Versioning
-- Semantic versioning (see `pyproject.toml`)
-- Releases tracked in GitHub
+## Code Style
+
+-   Follow PEP 8 for Python
+-   Use meaningful variable names
+-   Add comments for complex logic

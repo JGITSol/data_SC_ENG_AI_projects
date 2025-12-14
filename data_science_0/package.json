@@ -5,7 +5,7 @@
   "description": "A comprehensive data science portfolio project comparing Poland's living standards with the rest of Europe",
   "main": "functions/scheduled/refresh-numbeo.js",
   "scripts": {
-    "dev": "node server.js",
+    "dev": "node src/server.js",
     "dev:wrangler": "wrangler pages dev",
     "build": "npm run build:frontend",
     "build:frontend": "vue-cli-service build",
@@ -13,7 +13,7 @@
     "db:create": "wrangler d1 create poland-living-standards",
     "db:migrate": "wrangler d1 execute poland-living-standards --file=./database-schema.sql",
     "db:migrate-local": "wrangler d1 execute poland-living-standards --local --file=./database-schema.sql",
-    "start": "node server.js",
+    "start": "node src/server.js",
     "test": "mocha tests/integration/*.js"
   },
   "devDependencies": {

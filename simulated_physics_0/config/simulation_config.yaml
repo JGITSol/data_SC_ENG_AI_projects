@@ -1,0 +1,35 @@
+# Simulation configuration
+simulation:
+  dt: 0.01  # Time step in seconds
+  duration: 10.0  # Total simulation time in seconds
+  integrator: "euler"  # Options: euler, verlet, rk4
+
+# Particle settings
+particle:
+  mass: 1.0  # kg
+  position: [0.0, 10.0]  # Initial position [x, y] in meters
+  velocity: [5.0, 0.0]  # Initial velocity [vx, vy] in m/s
+
+# Force settings
+forces:
+  gravity:
+    enabled: true
+    g: 9.81  # m/s^2
+  
+  friction:
+    enabled: false
+    coefficient: 0.1
+  
+  spring:
+    enabled: false
+    anchor: [0.0, 0.0]
+    k: 10.0  # Spring constant
+    rest_length: 0.0
+
+# Visualization settings
+visualization:
+  show_trajectory: true
+  show_energy: true
+  show_phase_space: false
+  animate: false
+  save_path: "data/results/"

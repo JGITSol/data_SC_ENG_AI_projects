@@ -1,17 +1,23 @@
 # Contributing
 
-Thank you for considering contributing to this project!
+Thank you for your interest in this project! This is a portfolio project, but contributions or suggestions are welcome.
 
 ## How to Contribute
 
-1. Fork the repository and create your feature branch.
-2. Write clear, tested code and update documentation as needed.
-3. Run lint and tests before submitting your pull request.
-4. Use semantic commit messages.
-5. Submit a pull request with a detailed description.
+1.  **Fork the repository**
+2.  **Create a feature branch** (`git checkout -b feature/amazing-feature`)
+3.  **Commit your changes** (`git commit -m 'Add some amazing feature'`)
+4.  **Push to the branch** (`git push origin feature/amazing-feature`)
+5.  **Open a Pull Request**
 
-## Code Standards
-- ES6+ JavaScript
-- Vue 3 Composition API
-- ESLint and Prettier formatting
-- Unit and integration tests
+## Development Setup
+
+1.  Clone the repo
+2.  Install dependencies (`npm install`)
+3.  Run tests (`npm test`)
+
+## Code Style
+
+-   Follow standard JavaScript/Vue conventions
+-   Use meaningful variable names
+-   Add comments for complex logic

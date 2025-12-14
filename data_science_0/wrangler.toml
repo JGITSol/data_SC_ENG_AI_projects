@@ -1,0 +1,53 @@
+name = "poland-living-dashboard"
+main = "functions/scheduled/refresh-numbeo.js"
+compatibility_date = "2024-03-08"
+compatibility_flags = ["nodejs_compat"]
+
+# Environment variables (set these in Cloudflare dashboard)
+[vars]
+NODE_ENV = "production"
+
+# Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "poland-living-standards"
+database_id = "your-database-id-here" # Replace with actual D1 database ID
+
+# Cron triggers for scheduled data updates
+[[triggers]]
+crons = ["0 6 * * *"] # Daily at 6 AM UTC
+
+# Pages configuration
+[build]
+command = "npm run build"
+destination = "dist"
+
+# Environment-specific overrides
+[env.staging]
+[env.staging.vars]
+NODE_ENV = "staging"
+
+[env.production]
+[env.production.vars]
+NODE_ENV = "production"
+
+# Custom domains (optional)
+# [site]
+# bucket = "your-custom-domain.com"
+
+# KV namespaces (if needed for additional caching)
+# [[kv_namespaces]]
+# binding = "CACHE"
+# id = "your-kv-namespace-id"
+# preview_id = "your-preview-kv-namespace-id"
+
+# Analytics (optional)
+# [analytics]
+# enabled = true
+
+# Security headers
+[env.production.headers]
+"X-Frame-Options" = "DENY"
+"X-Content-Type-Options" = "nosniff"
+"Referrer-Policy" = "strict-origin-when-cross-origin"
+"Permissions-Policy" = "geolocation=(), microphone=(), camera=()"
