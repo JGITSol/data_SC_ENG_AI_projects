@@ -1,93 +1,36 @@
-# Poland Weather Data Lake (SOTA Edition)
+# Poland Quality Living MVP (Data Engineering)
 
-![CI](https://github.com/JGITSol/data_SC_ENG_AI_projects/workflows/CI%20Pipeline/badge.svg)
-
-A state-of-the-art, production-grade weather data pipeline for Polish cities. Built for data engineering portfolio showcase.
-
----
+## Overview
+A serverless ETL pipeline designed to aggregate real-time economic and weather data for Polish cities. This project demonstrates a modern "Data Lake" architecture using Cloudflare's edge ecosystem.
 
 ## Features
-- Real-time weather ingestion from Open-Meteo API
-- Multi-tier storage: raw, curated, analytics
-- Automated data validation and error handling
-- Monitoring endpoints and logging
-- Docker Compose for local development
-- CI/CD pipeline (GitHub Actions)
-- Unit and integration tests
-- API documentation and examples
+- **Serverless ETL**: Runs on Cloudflare Workers (Cron Triggers).
+- **Edge Database**: Stores structured data in Cloudflare D1 (SQLite at the Edge).
+- **Object Storage**: Archives raw JSON snapshots in Cloudflare R2.
+- **API Access**: Provides a RESTful API for querying aggregated metrics.
 
----
+## Tech Stack
+- **Runtime**: Cloudflare Workers (TypeScript)
+- **Database**: Cloudflare D1
+- **Storage**: Cloudflare R2
+- **Scheduling**: Cron Triggers
 
-## Architecture
+## Getting Started
 
-```mermaid
-graph TD
-    A[Open-Meteo API] --> B[Weather API Service]
-    B --> C[Postgres DB]
-    B --> D[Redis Cache]
-    B --> E[Monitoring]
-    B --> F[API Endpoints]
-    F --> G[Dashboard]
-```
+1. **Install Dependencies**
+   ```bash
+   npm install
+   ```
 
----
+2. **Local Development**
+   ```bash
+   npx wrangler dev
+   ```
 
-## Quick Start
-
-### Local Development
-```bash
-# Start all services
-docker-compose up --build
-# Access API at http://localhost:3003/api/current?city=warsaw
-```
-
-### Run Tests
-```bash
-npm test
-```
-
----
-
-## API Endpoints
-| Endpoint                | Method | Description                  |
-|------------------------|--------|------------------------------|
-| /api/current?city=NAME | GET    | Current weather for a city   |
-| /api/hourly?city=NAME  | GET    | Hourly forecast              |
-| /api/daily?city=NAME   | GET    | Daily forecast               |
-| /health                | GET    | Pipeline health/status       |
-
----
-
-## Data Validation & Monitoring
-- All incoming data is validated for schema and value ranges
-- Monitoring endpoint `/health` provides pipeline status
-- Errors and anomalies are logged and reported
-
----
-
-## Testing Strategy
-- Unit tests for core logic
-- Integration tests for API endpoints
-- Data validation tests (Great Expectations)
-- CI/CD runs all tests on every push
-
----
-
-## Deployment
-- Docker Compose for local and cloud deployment
-- GitHub Actions for CI/CD
-- Ready for cloud migration (AWS/GCP/Azure)
-
----
-
-## Portfolio Value
-This project demonstrates:
-- Modern data engineering practices
-- Automated testing and deployment
-- Robust error handling and monitoring
-- Clean, documented codebase
-
----
+3. **Deploy**
+   ```bash
+   npx wrangler deploy
+   ```
 
 ## License
 MIT

@@ -1,81 +1,36 @@
-# Simulated Physics 0: Basic Particle Motion
+# Physics Simulator
 
 ## Overview
-A foundational physics simulation project implementing basic Newtonian mechanics for particle motion in 2D space. This project demonstrates fundamental physics concepts including position, velocity, acceleration, and forces.
+A deterministic physics engine simulating rigid body dynamics using Verlet integration. Designed for educational simulations of particle systems, orbital mechanics, and collisions.
 
 ## Features
-- 2D particle motion simulation
-- Basic force calculations (gravity, friction)
-- Euler integration for position updates
-- Visualization of particle trajectories
-- Energy conservation validation
+- **Integration**: Verlet and Euler solvers for stable trajectory simulation.
+- **Forces**: Gravity, Drag, Spring, and custom force fields.
+- **Collision**: Basic ground collision and restitution.
+- **Interactive UI**: Streamlit dashboard for real-time parameter tuning.
 
-## Physics Concepts
-- Newtonian mechanics
-- Kinematics equations
-- Vector operations
-- Numerical integration methods
+## Tech Stack
+- **Language**: Python 3.10+
+- **Libraries**: NumPy, Matplotlib
+- **UI**: Streamlit
+- **Testing**: Pytest
 
-## Project Structure
-```
-simulated_physics_0/
-├── src/
-│   ├── __init__.py
-│   ├── particle.py          # Particle class with position/velocity
-│   ├── forces.py            # Force calculation functions
-│   ├── integrator.py        # Numerical integration methods
-│   └── visualizer.py        # Plotting and animation
-├── tests/
-│   ├── test_particle.py
-│   ├── test_forces.py
-│   └── test_integration.py
-├── config/
-│   └── simulation_config.yaml
-├── data/
-│   └── results/
-└── notebooks/
-    └── demo.ipynb
-```
+## Getting Started
 
-## Installation
+1. **Install Dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-```bash
-pip install -r requirements.txt
-```
+2. **Run Interactive Lab**
+   ```bash
+   streamlit run streamlit_app.py
+   ```
 
-## Usage
-
-```python
-from src.particle import Particle
-from src.forces import apply_gravity
-from src.integrator import euler_step
-from src.visualizer import plot_trajectory
-
-# Create a particle
-particle = Particle(mass=1.0, position=[0, 10], velocity=[5, 0])
-
-# Run simulation
-trajectory = []
-for _ in range(100):
-    force = apply_gravity(particle)
-    euler_step(particle, force, dt=0.1)
-    trajectory.append(particle.position.copy())
-
-# Visualize
-plot_trajectory(trajectory)
-```
-
-## Testing
-
-```bash
-pytest tests/
-```
-
-## Learning Objectives
-- Understand basic Newtonian mechanics
-- Implement numerical integration
-- Validate physics simulations
-- Visualize physical systems
+3. **Run Tests**
+   ```bash
+   pytest
+   ```
 
 ## License
-MIT License
+MIT

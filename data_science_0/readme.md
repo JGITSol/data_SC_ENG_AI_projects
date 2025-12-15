@@ -1,99 +1,36 @@
-# Poland Living Standards Dashboard (SOTA Edition)
+# Cost Living Chart (Data Science)
 
-![CI](https://github.com/JGITSol/data_SC_ENG_AI_projects/workflows/CI%20Pipeline/badge.svg)
-
-A state-of-the-art, production-grade data science dashboard for Polish cities. Built for data science portfolio showcase.
-
----
+## Overview
+An interactive data visualization dashboard comparing living costs and quality of life metrics across Polish cities. Built with Vue.js and Chart.js, it consumes data from the Data Engineering pipeline.
 
 ## Features
-- Interactive dashboard with real-time data
-- Automated data ingestion from World Bank, Numbeo, Eurostat
-- Machine learning pipeline for cost of living prediction
-- Data validation and error handling
-- REST API for predictions
-- Docker Compose for local development
-- CI/CD pipeline (GitHub Actions)
-- Unit and integration tests
-- API documentation and examples
+- **Interactive Charts**: Dynamic bar and radar charts using Chart.js.
+- **Real-time Data**: Fetches latest metrics from the Cloudflare Workers API.
+- **Comparative Analysis**: Side-by-side city comparison tools.
+- **Responsive UI**: Mobile-friendly dashboard layout.
 
----
+## Tech Stack
+- **Frontend**: Vue.js 3 (Composition API)
+- **Visualization**: Chart.js
+- **Hosting**: Cloudflare Pages
+- **API Integration**: Fetch API
 
-## Architecture
+## Getting Started
 
-```mermaid
-graph TD
-    A[World Bank API] --> B[Data Ingestion]
-    A2[Numbeo API] --> B
-    A3[Eurostat API] --> B
-    B --> C[ML Pipeline]
-    C --> D[Prediction API]
-    D --> E[Dashboard]
-    B --> F[Postgres DB]
-    B --> G[Redis Cache]
-    D --> H[Monitoring]
-```
+1. **Install Dependencies**
+   ```bash
+   npm install
+   ```
 
----
+2. **Local Development**
+   ```bash
+   npx wrangler pages dev .
+   ```
 
-## Quick Start
-
-### Local Development
-```bash
-# Start all services
-docker-compose up --build
-# Access dashboard at http://localhost:3002
-```
-
-### Run Tests
-```bash
-npm test
-```
-
----
-
-## API Endpoints
-| Endpoint                | Method | Description                  |
-|------------------------|--------|------------------------------|
-| /api/poland-gdp        | GET    | Poland GDP per capita        |
-| /api/predict           | POST   | ML prediction for a city     |
-| /api/cities            | GET    | List of cities               |
-| /health                | GET    | Pipeline health/status       |
-
----
-
-## ML Pipeline & Monitoring
-- Automated feature engineering and model training
-- Hyperparameter tuning (Optuna)
-- Model validation and explainability (SHAP)
-- Monitoring endpoint `/health` provides pipeline status
-- Errors and anomalies are logged and reported
-
----
-
-## Testing Strategy
-- Unit tests for core logic
-- Integration tests for API endpoints
-- Data validation tests
-- CI/CD runs all tests on every push
-
----
-
-## Deployment
-- Docker Compose for local and cloud deployment
-- GitHub Actions for CI/CD
-- Ready for cloud migration (AWS/GCP/Azure)
-
----
-
-## Portfolio Value
-This project demonstrates:
-- Modern data science and MLOps practices
-- Automated testing and deployment
-- Robust error handling and monitoring
-- Clean, documented codebase
-
----
+3. **Deploy**
+   ```bash
+   npx wrangler pages deploy .
+   ```
 
 ## License
 MIT

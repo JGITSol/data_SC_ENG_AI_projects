@@ -1,44 +1,36 @@
-# Applied Mathematics 0: Numerical Methods
+# Applied Math Library
 
 ## Overview
-Implementation of fundamental numerical methods for solving equations, interpolation, differentiation, and integration.
+A high-performance Python library for numerical computing, focusing on root finding, integration, and linear algebra. Includes an interactive Streamlit dashboard for educational exploration.
 
 ## Features
-- Root finding (bisection, Newton-Raphson, secant method)
-- Numerical differentiation (forward, backward, central difference)
-- Numerical integration (trapezoidal, Simpson's rule, Gaussian quadrature)
-- Linear interpolation and spline interpolation
-- Error analysis and convergence rates
+- **Root Finding**: Newton-Raphson, Bisection, Secant methods.
+- **Numerical Integration**: Trapezoidal, Simpson's, and Romberg integration.
+- **Linear Algebra**: Matrix decompositions (LU, QR) and solvers.
+- **Interactive UI**: Streamlit app for visualizing algorithm convergence.
 
-## Mathematical Topics
-- Root finding algorithms
-- Finite difference methods
-- Numerical quadrature
-- Interpolation theory
-- Truncation and round-off errors
+## Tech Stack
+- **Language**: Python 3.10+
+- **Libraries**: NumPy, SciPy, Matplotlib
+- **UI**: Streamlit
+- **Testing**: Pytest
 
-## Key Methods
-- **Bisection**: Guaranteed convergence, slow
-- **Newton-Raphson**: Fast convergence (quadratic), requires derivative
-- **Trapezoidal Rule**: O(h²) accuracy
-- **Simpson's Rule**: O(h⁴) accuracy
+## Getting Started
 
-## Installation
-```bash
-pip install -r requirements.txt
-```
+1. **Install Dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-## Usage
-```python
-from src.root_finding import newton_raphson
-from src.integration import simpsons_rule
+2. **Run Interactive Lab**
+   ```bash
+   streamlit run streamlit_app.py
+   ```
 
-# Find root of f(x) = x^2 - 2
-root = newton_raphson(lambda x: x**2 - 2, x0=1.0)
-
-# Integrate function
-result = simpsons_rule(lambda x: x**2, a=0, b=1, n=100)
-```
+3. **Run Tests**
+   ```bash
+   pytest
+   ```
 
 ## License
-MIT License
+MIT
