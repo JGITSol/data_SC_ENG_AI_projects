@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Network Visualizer | Data Lab</title>
+    <link rel="stylesheet" href="../assets/site.css">
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.15.0/dist/tf.min.js"></script>
+    <style>
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            /* Background managed by JS */
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            display: block;
+            cursor: crosshair;
+        }
+
+        .stats-panel {
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body data-lab-name="Data Lab" data-page-name="Neural Network Visualizer" data-home="../index.html">
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <a href="../index.html" class="back-link">
+                    <i data-lucide="arrow-left"></i> Back to Hub
+                </a>
+                <h1 data-i18n="title">Neural Network Visualizer</h1>
+                <p class="subtitle" data-i18n="subtitle">Train a neural network in your browser to classify data points.
+                </p>
+            </div>
+        </header>
+
+        <div class="grid">
+            <!-- Controls -->
+            <div class="card">
+                <div class="card-header"><i data-lucide="settings"></i> <span data-i18n="config">Configuration</span>
+                </div>
+
+                <div class="form-group">
+                    <label data-i18n="dataset">Dataset Shape</label>
+                    <select id="dataSnap">
+                        <option value="circle">Concentric Circles</option>
+                        <option value="xor">XOR Pattern</option>
+                        <option value="gauss">Two Gaussian Blobs</option>
+                        <option value="spiral">Spiral (Hard)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label data-i18n="learningRate">Learning Rate: <span id="lrVal">0.1</span></label>
+                    <input type="range" id="lr" min="0.001" max="1.0" step="0.01" value="0.1">
+                </div>
+
+                <div class="form-group">
+                    <label data-i18n="hiddenUnits">Hidden Neurons: <span id="huVal">4</span></label>
+                    <input type="range" id="hiddenUnits" min="1" max="10" step="1" value="4">
+                </div>
+
+                <div class="action-row">
+                    <button id="btnTrain" class="btn primary"><i data-lucide="play"></i> <span
+                            data-i18n="train">Train</span></button>
+                    <button id="btnReset" class="btn btn-secondary"><i data-lucide="rotate-ccw"></i> <span
+                            data-i18n="reset">Reset</span></button>
+                </div>
+
+                <div class="stats-panel">
+                    <div><span data-i18n="epoch">Epoch</span>: <span id="epoch">0</span></div>
+                    <div><span data-i18n="loss">Loss</span>: <span id="loss">0.000</span></div>
+                </div>
+            </div>
+
+            <!-- Visualizer -->
+            <div class="card card-no-padding">
+                <div class="canvas-container" style="height:400px;">
+                    <canvas id="nnCanvas" width="400" height="400"></canvas>
+                </div>
+                <div style="padding: 12px; text-align: center;">
+                    <p style="font-size:0.85rem; color:var(--text-light);">
+                        <span style="color:#a78bfa; font-weight:bold;">Violet</span> = Class 0,
+                        <span style="color:#f472b6; font-weight:bold;">Pink</span> = Class 1.
+                        Points are training data.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ... (translations and app object properties) ...
+        const translations = {
+            en: {
+                title: 'Neural Network Visualizer',
+                subtitle: 'Train a neural network in your browser to classify data points.',
+                config: 'Configuration',
+                dataset: 'Dataset Shape',
+                learningRate: 'Learning Rate',
+                hiddenUnits: 'Hidden Neurons',
+                train: 'Train/Pause',
+                reset: 'Reset',
+                epoch: 'Epoch',
+                loss: 'Loss',
+                viz: 'Classification Map'
+            },
+            pl: {
+                title: 'Wizualizacja Sieci Neuronowej',
+                subtitle: 'Trenuj sieć neuronową w przeglądarce do klasyfikacji punktów.',
+                config: 'Konfiguracja',
+                dataset: 'Kształt Danych',
+                learningRate: 'Współczynnik Uczenia',
+                hiddenUnits: 'Neurony Ukryte',
+                train: 'Trenuj/Pauza',
+                reset: 'Reset',
+                epoch: 'Epoka',
+                loss: 'Strata',
+                viz: 'Mapa Klasyfikacji'
+            }
+        };
+
+        const app = {
+            lang: 'en',
+            model: null,
+            isTraining: false,
+            data: [],
+            epoch: 0,
+            losses: [],
+            rafId: null,
+
+            params: {
+                lr: 0.1,
+                neurons: 4,
+                shape: 'circle'
+            },
+
+            init: () => {
+                // UI Init
+                app.lang = document.documentElement.getAttribute('lang') || 'en';
+                app.updateTranslations();
+                window.addEventListener('langchange', (e) => {
+                    app.lang = e.detail.lang;
+                    app.updateTranslations();
+                });
+
+                window.addEventListener('themechange', () => {
+                    app.draw();
+                });
+
+                document.getElementById('lr').addEventListener('input', (e) => {
+                    app.params.lr = parseFloat(e.target.value);
+                    document.getElementById('lrVal').textContent = app.params.lr.toFixed(3);
+                    if (app.model) app.model.optimizer.learningRate = app.params.lr;
+                });
+                document.getElementById('hiddenUnits').addEventListener('input', (e) => {
+                    app.params.neurons = parseInt(e.target.value);
+                    document.getElementById('huVal').textContent = app.params.neurons;
+                    app.reset();
+                });
+                document.getElementById('dataSnap').addEventListener('change', (e) => {
+                    app.params.shape = e.target.value;
+                    app.reset();
+                });
+
+                document.getElementById('btnTrain').addEventListener('click', app.toggleTrain);
+                document.getElementById('btnReset').addEventListener('click', app.reset);
+
+                app.reset();
+            },
+
+            updateTranslations: () => {
+                const t = translations[app.lang] || translations.en;
+                document.querySelectorAll('[data-i18n]').forEach(el => {
+                    const key = el.getAttribute('data-i18n');
+                    if (t[key]) el.textContent = t[key];
+                });
+            },
+
+            generateData: () => {
+                app.data = [];
+                const N = 200;
+                const shape = app.params.shape;
+
+                for (let i = 0; i < N; i++) {
+                    let x = (Math.random() * 2) - 1;
+                    let y = (Math.random() * 2) - 1;
+                    let label = 0;
+
+                    if (shape === 'circle') {
+                        label = (x * x + y * y < 0.5) ? 1 : 0;
+                    } else if (shape === 'xor') {
+                        label = (x > 0 && y > 0) || (x < 0 && y < 0) ? 0 : 1;
+                    } else if (shape === 'gauss') {
+                        if (Math.random() > 0.5) {
+                            x = Math.random() * 0.6 + 0.2;
+                            y = Math.random() * 0.6 + 0.2;
+                            label = 1;
+                        } else {
+                            x = Math.random() * 0.6 - 0.8;
+                            y = Math.random() * 0.6 - 0.8;
+                            label = 0;
+                        }
+                    } else if (shape === 'spiral') {
+                        const r = Math.random();
+                        const theta = r * 4 * Math.PI;
+                        const noise = Math.random() * 0.1;
+                        if (Math.random() > 0.5) {
+                            x = r * Math.cos(theta) + noise;
+                            y = r * Math.sin(theta) + noise;
+                            label = 0;
+                        } else {
+                            x = r * Math.cos(theta + Math.PI) + noise;
+                            y = r * Math.sin(theta + Math.PI) + noise;
+                            label = 1;
+                        }
+                    }
+                    app.data.push({ x, y, label });
+                }
+            },
+
+            reset: () => {
+                app.isTraining = false;
+                app.epoch = 0;
+                document.getElementById('epoch').textContent = '0';
+                document.getElementById('loss').textContent = '0.000';
+                app.generateData();
+
+                tf.tidy(() => {
+                    app.model = tf.sequential();
+                    app.model.add(tf.layers.dense({
+                        units: app.params.neurons,
+                        inputShape: [2],
+                        activation: 'tanh'
+                    }));
+                    app.model.add(tf.layers.dense({
+                        units: 1,
+                        activation: 'sigmoid'
+                    }));
+                    app.model.compile({
+                        optimizer: tf.train.adam(app.params.lr),
+                        loss: 'binaryCrossentropy'
+                    });
+                });
+
+                app.draw();
+            },
+
+            toggleTrain: () => {
+                app.isTraining = !app.isTraining;
+                if (app.isTraining) {
+                    app.trainLoop();
+                }
+            },
+
+            trainLoop: async () => {
+                if (!app.isTraining) return;
+
+                const inputs = app.data.map(d => [d.x, d.y]);
+                const labels = app.data.map(d => [d.label]);
+
+                const xs = tf.tensor2d(inputs);
+                const ys = tf.tensor2d(labels);
+
+                const history = await app.model.fit(xs, ys, {
+                    epochs: 5,
+                    shuffle: true
+                });
+
+                xs.dispose();
+                ys.dispose();
+
+                app.epoch += 5;
+                const loss = history.history.loss[0];
+                document.getElementById('epoch').textContent = app.epoch;
+                document.getElementById('loss').textContent = loss.toFixed(4);
+
+                app.draw();
+
+                if (app.isTraining) {
+                    requestAnimationFrame(app.trainLoop);
+                }
+            },
+
+            draw: () => {
+                const canvas = document.getElementById('nnCanvas');
+                const ctx = canvas.getContext('2d');
+                const w = canvas.width;
+                const h = canvas.height;
+                const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+
+                // 1. Draw Decision Boundary (Heatmap)
+                const step = 0.04;
+                const gridPoints = [];
+                for (let x = -1; x <= 1; x += step) {
+                    for (let y = -1; y <= 1; y += step) {
+                        gridPoints.push([x, y]);
+                    }
+                }
+
+                tf.tidy(() => {
+                    const gridTensor = tf.tensor2d(gridPoints, [gridPoints.length, 2]);
+                    const preds = app.model.predict(gridTensor).dataSync();
+
+                    ctx.clearRect(0, 0, w, h);
+
+                    // Background fill based on theme 
+                    ctx.fillStyle = theme === 'dark' ? '#020617' : '#f8fafc';
+                    ctx.fillRect(0, 0, w, h);
+
+                    const cellW = (step / 2) * w;
+                    const cellH = (step / 2) * h;
+
+                    let i = 0;
+                    for (let x = -1; x <= 1; x += step) {
+                        for (let y = -1; y <= 1; y += step) {
+                            const p = preds[i++]; // 0..1
+                            const tx = (x + 1) / 2 * w;
+                            const ty = (1 - y) / 2 * h;
+
+                            // Interpolate colors: 0 -> Violet (#a78bfa), 1 -> Pink (#f472b6)
+                            const r = Math.floor(167 * (1 - p) + 244 * p);
+                            const g = Math.floor(139 * (1 - p) + 114 * p);
+                            const b = Math.floor(250 * (1 - p) + 182 * p);
+
+                            // Lower opacity for light mode to avoid being too overwhelming
+                            const alpha = theme === 'dark' ? 0.25 : 0.15;
+                            ctx.fillStyle = `rgba(${r},${g},${b}, ${alpha})`;
+                            ctx.fillRect(tx - cellW, ty - cellH, cellW * 2 + 1, cellH * 2 + 1);
+                        }
+                    }
+                });
+
+                // 2. Draw Points
+                app.data.forEach(p => {
+                    const tx = (p.x + 1) / 2 * w;
+                    const ty = (1 - p.y) / 2 * h;
+
+                    const color = p.label === 0 ? '#a78bfa' : '#f472b6';
+
+                    if (theme === 'dark') {
+                        ctx.shadowBlur = 8;
+                        ctx.shadowColor = color;
+                    }
+
+                    ctx.beginPath();
+                    ctx.arc(tx, ty, 4.5, 0, Math.PI * 2);
+                    ctx.fillStyle = color;
+                    ctx.fill();
+
+                    ctx.shadowBlur = 0;
+                    ctx.strokeStyle = theme === 'dark' ? '#fff' : 'rgba(0,0,0,0.5)';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                });
+            }
+        };
+
+        window.onload = app.init;
+    </script>
+    <script src="../assets/site.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clustering Playground | Data Lab</title>
+    <link rel="stylesheet" href="../assets/site.css">
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+    <style>
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        canvas {
+            background: transparent;
+            cursor: crosshair;
+        }
+    </style>
+</head>
+
+<body data-lab-name="Data Lab" data-page-name="Clustering Playground" data-home="../index.html">
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <a href="../index.html" class="back-link">
+                    <i data-lucide="arrow-left"></i> Back to Hub
+                </a>
+                <h1 data-i18n="title">Clustering Playground</h1>
+                <p class="subtitle" data-i18n="subtitle">Interactive K-Means algorithm visualization. Click to add
+                    points.</p>
+            </div>
+        </header>
+
+        <div class="grid">
+            <!-- Controls -->
+            <div class="card">
+                <div class="card-header"><i data-lucide="settings"></i> <span data-i18n="config">Configuration</span>
+                </div>
+
+                <div class="form-group">
+                    <label><span data-i18n="numClusters">Number of Clusters (K)</span>: <span id="kVal">3</span></label>
+                    <input type="range" id="kRange" min="2" max="6" step="1" value="3">
+                </div>
+
+                <div class="action-row">
+                    <button id="btnStep" class="btn primary"><i data-lucide="step-forward"></i> <span
+                            data-i18n="step">Step</span></button>
+                    <button id="btnAuto" class="btn btn-secondary"><i data-lucide="play"></i> <span
+                            data-i18n="run">Run</span></button>
+                    <button id="btnReset" class="btn btn-secondary"
+                        style="color:var(--error); border-color:var(--error)"><i data-lucide="trash-2"></i> <span
+                            data-i18n="clear">Clear</span></button>
+                </div>
+
+                <hr style="border:0; border-top:1px solid var(--border); margin:16px 0;">
+
+                <div class="action-row">
+                    <button id="btnRandom" class="btn btn-secondary"><i data-lucide="shuffle"></i> Generate Random
+                        Data</button>
+                </div>
+
+                <div class="stats-panel" style="margin-top:20px; color:var(--text-light); font-family:monospace;">
+                    <div><span data-i18n="status">Status</span>: <span id="status">Ready</span></div>
+                </div>
+            </div>
+
+            <!-- Visualization -->
+            <div class="card card-no-padding">
+                <div class="canvas-container" style="height:460px; position:relative; overflow:hidden;">
+                    <canvas id="clusterCanvas" style="display:block;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ... (translations and app object properties) ...
+        const translations = {
+            en: {
+                title: 'Clustering Playground',
+                subtitle: 'Interactive K-Means algorithm visualization. Click to add points.',
+                config: 'Configuration',
+                numClusters: 'Number of Clusters (K)',
+                step: 'Step',
+                run: 'Auto Run',
+                clear: 'Clear Data',
+                status: 'Status',
+                viz: 'Cluster Map'
+            },
+            pl: {
+                title: 'Symulator Klastrowania',
+                subtitle: 'Interaktywna wizualizacja K-Means. Kliknij aby dodać punkty.',
+                config: 'Konfiguracja',
+                numClusters: 'Liczba Klastrów (K)',
+                step: 'Krok',
+                run: 'Auto Start',
+                clear: 'Wyczyść',
+                status: 'Status',
+                viz: 'Mapa Klastrów'
+            }
+        };
+
+        const app = {
+            lang: 'en',
+            points: [],
+            centroids: [],
+            k: 3,
+            assignments: [],
+            isRunning: false,
+            hasConverged: false,
+            // Modern, vibrant colors for the dark background
+            colors: ['#f87171', '#4ade80', '#60a5fa', '#facc15', '#f472b6', '#a78bfa'],
+
+            init: () => {
+                app.canvas = document.getElementById('clusterCanvas');
+                app.ctx = app.canvas.getContext('2d');
+
+                window.addEventListener('resize', app.resize);
+                app.resize();
+
+                app.lang = document.documentElement.getAttribute('lang') || 'en';
+                app.updateTranslations();
+                window.addEventListener('langchange', (e) => {
+                    app.lang = e.detail.lang;
+                    app.updateTranslations();
+                });
+
+                window.addEventListener('themechange', () => {
+                    app.draw();
+                });
+
+                document.getElementById('kRange').addEventListener('input', (e) => {
+                    app.k = parseInt(e.target.value);
+                    document.getElementById('kVal').textContent = app.k;
+                    app.resetCentroids();
+                    app.draw();
+                });
+
+                document.getElementById('btnReset').addEventListener('click', app.clearData);
+                document.getElementById('btnRandom').addEventListener('click', app.generateRandom);
+                document.getElementById('btnStep').addEventListener('click', app.step);
+                document.getElementById('btnAuto').addEventListener('click', app.toggleAuto);
+
+                app.canvas.addEventListener('mousedown', (e) => {
+                    const rect = app.canvas.getBoundingClientRect();
+                    app.points.push({
+                        x: e.clientX - rect.left,
+                        y: e.clientY - rect.top
+                    });
+                    app.hasConverged = false;
+                    app.draw();
+                });
+
+                app.generateRandom();
+            },
+
+            resize: () => {
+                const container = app.canvas.parentElement;
+                app.canvas.width = container.clientWidth;
+                app.canvas.height = container.clientHeight;
+                app.draw();
+            },
+
+            updateTranslations: () => {
+                const t = translations[app.lang] || translations.en;
+                document.querySelectorAll('[data-i18n]').forEach(el => {
+                    const key = el.getAttribute('data-i18n');
+                    if (t[key]) el.textContent = t[key];
+                });
+            },
+
+            generateRandom: () => {
+                app.points = [];
+                const w = app.canvas.width;
+                const h = app.canvas.height;
+                const N = 60;
+                for (let i = 0; i < N; i++) {
+                    app.points.push({
+                        x: Math.random() * w * 0.8 + w * 0.1,
+                        y: Math.random() * h * 0.8 + h * 0.1
+                    });
+                }
+                app.assignments = new Array(N).fill(-1);
+                app.initCentroids();
+                app.draw();
+            },
+
+            clearData: () => {
+                app.points = [];
+                app.centroids = [];
+                app.assignments = [];
+                app.isRunning = false;
+                app.hasConverged = false;
+                document.getElementById('status').textContent = 'Cleared';
+                app.draw();
+            },
+
+            initCentroids: () => {
+                app.centroids = [];
+                if (app.points.length < app.k) return;
+                const indices = new Set();
+                while (indices.size < app.k) {
+                    indices.add(Math.floor(Math.random() * app.points.length));
+                }
+                indices.forEach(idx => {
+                    app.centroids.push({ ...app.points[idx] });
+                });
+                app.assignments = new Array(app.points.length).fill(-1);
+                app.hasConverged = false;
+            },
+
+            resetCentroids: () => {
+                if (app.points.length > 0) app.initCentroids();
+            },
+
+            step: () => {
+                if (app.points.length === 0) return;
+                if (app.centroids.length === 0) app.initCentroids();
+                if (app.hasConverged) return;
+
+                let changed = false;
+                app.points.forEach((p, i) => {
+                    let minDist = Infinity;
+                    let bestK = -1;
+                    app.centroids.forEach((c, k) => {
+                        const dist = (p.x - c.x) ** 2 + (p.y - c.y) ** 2;
+                        if (dist < minDist) {
+                            minDist = dist;
+                            bestK = k;
+                        }
+                    });
+                    if (app.assignments[i] !== bestK) {
+                        app.assignments[i] = bestK;
+                        changed = true;
+                    }
+                });
+
+                if (changed) {
+                    const sums = Array(app.k).fill(0).map(() => ({ x: 0, y: 0, count: 0 }));
+                    app.points.forEach((p, i) => {
+                        const k = app.assignments[i];
+                        if (k !== -1) {
+                            sums[k].x += p.x;
+                            sums[k].y += p.y;
+                            sums[k].count++;
+                        }
+                    });
+
+                    app.centroids.forEach((c, k) => {
+                        if (sums[k].count > 0) {
+                            c.x = sums[k].x / sums[k].count;
+                            c.y = sums[k].y / sums[k].count;
+                        }
+                    });
+                    document.getElementById('status').textContent = 'Optimizing...';
+                } else {
+                    app.hasConverged = true;
+                    app.isRunning = false;
+                    document.getElementById('status').textContent = 'Converged!';
+                }
+                app.draw();
+            },
+
+            toggleAuto: () => {
+                if (app.hasConverged) app.initCentroids();
+                app.isRunning = !app.isRunning;
+                if (app.isRunning) app.runLoop();
+            },
+
+            runLoop: () => {
+                if (!app.isRunning || app.hasConverged) return;
+                app.step();
+                setTimeout(() => requestAnimationFrame(app.runLoop), 200);
+            },
+
+            draw: () => {
+                const ctx = app.ctx;
+                const w = ctx.canvas.width;
+                const h = ctx.canvas.height;
+                const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+
+                ctx.clearRect(0, 0, w, h);
+
+                // Background
+                ctx.fillStyle = theme === 'dark' ? '#020617' : '#f8fafc';
+                ctx.fillRect(0, 0, w, h);
+
+                // Grid
+                ctx.strokeStyle = theme === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.04)';
+                ctx.lineWidth = 1;
+                for (let x = 0; x < w; x += 50) {
+                    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+                }
+                for (let y = 0; y < h; y += 50) {
+                    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+                }
+
+                // Connections
+                ctx.globalAlpha = 0.15;
+                app.points.forEach((p, i) => {
+                    const k = app.assignments[i];
+                    if (k !== -1) {
+                        ctx.strokeStyle = app.colors[k % app.colors.length];
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(app.centroids[k].x, app.centroids[k].y);
+                        ctx.stroke();
+                    }
+                });
+                ctx.globalAlpha = 1.0;
+
+                // Points
+                app.points.forEach((p, i) => {
+                    const k = app.assignments[i];
+                    const color = k === -1 ? '#94a3b8' : app.colors[k % app.colors.length];
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+                    ctx.fillStyle = color;
+                    ctx.fill();
+                    ctx.strokeStyle = theme === 'dark' ? '#fff' : 'rgba(0,0,0,0.5)';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                });
+
+                // Centroids
+                app.centroids.forEach((c, k) => {
+                    const color = app.colors[k % app.colors.length];
+                    ctx.save();
+                    ctx.translate(c.x, c.y);
+
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = color;
+
+                    const s = 10;
+                    ctx.beginPath();
+                    ctx.moveTo(0, -s * 1.5);
+                    ctx.lineTo(s * 1.2, s * 0.8);
+                    ctx.lineTo(-s * 1.2, s * 0.8);
+                    ctx.closePath();
+
+                    ctx.fillStyle = color;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    ctx.strokeStyle = theme === 'dark' ? '#fff' : 'rgba(0,0,0,0.6)';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.restore();
+                });
+            }
+        };
+
+        window.onload = app.init;
+    </script>
+    <script src="../assets/site.js"></script>
+</body>
+
+</html>

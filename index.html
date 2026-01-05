@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Science & AI Lab | Applied Engineering</title>
+    <meta name="description"
+        content="Interactive sandboxes for Neural Networks, Machine Learning, Genetic Algorithms, and Data Engineering.">
+    <link rel="stylesheet" href="./assets/site.css">
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+    <script>
+        window.PAGE_TRANSLATIONS = {
+            en: {
+                heroTitle: 'Data Science & AI Laboratory',
+                heroDesc: 'Interactive sandboxes for Neural Networks, Machine Learning, Genetic Algorithms, and Data Engineering fundamentals. Exploring intelligence through code.',
+                chipInteractive: 'Interactive Visuals',
+                chipTheme: 'Dark/Light Theme',
+                chipAlgo: 'Algorithms',
+                chipML: 'Machine Learning',
+                sectionTitle: 'Experiment Collection',
+                sectionSubtitle: 'Select a project to explore',
+                tile1Chip: 'AI · Deep Learning',
+                tile1Title: 'Neural Network Visualizer',
+                tile1Desc: 'Interactive neural network training and classification decision boundary visualization.',
+                tile2Chip: 'ML · Clustering',
+                tile2Title: 'Clustering Playground',
+                tile2Desc: 'K-Means clustering visualization with interactive data points and centroids.',
+                tile3Chip: 'Evolution · AI',
+                tile3Title: 'Genetic Algorithms & Evolution',
+                tile3Desc: 'Simulating evolution with genetic algorithms: Smart Rockets and optimization.',
+                tile4Chip: 'NLP · AI',
+                tile4Title: 'Sentiment & Emotion Analysis',
+                tile4Desc: 'Real-time text processing using BERT transformers directly in your browser.',
+                tile5Chip: 'Analytics · ML',
+                tile5Title: 'Weather Analytics & Predictor',
+                tile5Desc: 'Predicting meteorological trends using regression models on European data.',
+                openLab: 'Open Lab'
+            },
+            pl: {
+                heroTitle: 'Laboratorium Data Science i AI',
+                heroDesc: 'Interaktywne symulacje Sieci Neuronowych, Uczenia Maszynowego, Algorytmów Genetycznych i Inżynierii Danych. Eksploracja inteligencji przez kod.',
+                chipInteractive: 'Interaktywne wizualizacje',
+                chipTheme: 'Ciemny/Jasny Motyw',
+                chipAlgo: 'Algorytmy',
+                chipML: 'Uczenie Maszynowe',
+                sectionTitle: 'Kolekcja Eksperymentów',
+                sectionSubtitle: 'Wybierz projekt do eksploracji',
+                tile1Chip: 'AI · Deep Learning',
+                tile1Title: 'Wizualizacja Sieci Neuronowej',
+                tile1Desc: 'Interaktywny trening sieci neuronowej i wizualizacja granic decyzyjnych.',
+                tile2Chip: 'ML · Klastrowanie',
+                tile2Title: 'Symulator Klastrowania',
+                tile2Desc: 'Wizualizacja algorytmu K-Means z interaktywnymi punktami danych.',
+                tile3Chip: 'Ewolucja · AI',
+                tile3Title: 'Algorytmy Genetyczne i Ewolucja',
+                tile3Desc: 'Symulacja ewolucji za pomocą algorytmów genetycznych: Smart Rockets i optymalizacja.',
+                tile4Chip: 'NLP · AI',
+                tile4Title: 'Analiza Sentymentu i Emocji',
+                tile4Desc: 'Przetwarzanie tekstu w czasie rzeczywistym przy użyciu transformatorów BERT.',
+                tile5Chip: 'Analityka · ML',
+                tile5Title: 'Analityka Pogodowa i Predyktor',
+                tile5Desc: 'Przewidywanie trendów meteorologicznych za pomocą modeli regresji.',
+                openLab: 'Otwórz Lab'
+            }
+        };
+    </script>
+</head>
+
+<body data-lab-name="Data Lab" data-page-name="Data & AI Lab" data-home="./index.html"
+    data-tags="AI, ML, Data Science, Algorithms">
+    <div class="lab-shell">
+        <section class="hero lab-card soft">
+            <div>
+                <h1 data-i18n="heroTitle">Data Science & AI Laboratory</h1>
+                <p data-i18n="heroDesc">Interactive sandboxes for Neural Networks, Machine Learning, Genetic Algorithms,
+                    and Data Engineering fundamentals. Exploring intelligence through code.</p>
+                <div class="cta-row">
+                    <span class="chip" data-i18n="chipInteractive">Interactive Visuals</span>
+                    <span class="chip" data-i18n="chipTheme">Dark/Light Theme</span>
+                    <span class="chip" data-i18n="chipML">Machine Learning</span>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-title">
+            <h2 style="margin:0; font-size:1.1rem; color: var(--text-main);" data-i18n="sectionTitle">Experiment
+                Collection</h2>
+            <span data-i18n="sectionSubtitle">Select a project to explore</span>
+        </div>
+
+        <div class="lab-grid">
+            <!-- Project 1 -->
+            <article class="lab-card lab-tile">
+                <div class="chip" data-i18n="tile1Chip">AI · Deep Learning</div>
+                <h3 data-i18n="tile1Title">Neural Network Visualizer</h3>
+                <p data-i18n="tile1Desc">Interactive neural network training and classification decision boundary
+                    visualization.</p>
+                <div class="tile-actions">
+                    <a class="pill primary" href="./project1/index.html" data-i18n="openLab">Open Lab</a>
+                </div>
+            </article>
+
+            <!-- Project 2 -->
+            <article class="lab-card lab-tile">
+                <div class="chip" data-i18n="tile2Chip">ML · Clustering</div>
+                <h3 data-i18n="tile2Title">Clustering Playground</h3>
+                <p data-i18n="tile2Desc">K-Means clustering visualization with interactive data points and centroids.
+                </p>
+                <div class="tile-actions">
+                    <a class="pill primary" href="./project2/index.html" data-i18n="openLab">Open Lab</a>
+                </div>
+            </article>
+
+            <!-- Project 3 -->
+            <article class="lab-card lab-tile">
+                <div class="chip" data-i18n="tile3Chip">Evolution · AI</div>
+                <h3 data-i18n="tile3Title">Genetic Algorithms & Evolution</h3>
+                <p data-i18n="tile3Desc">Simulating evolution with genetic algorithms: Smart Rockets and optimization.
+                </p>
+                <div class="tile-actions">
+                    <a class="pill primary" href="./project3/index.html" data-i18n="openLab">Open Lab</a>
+                </div>
+            </article>
+
+            <!-- Project 4 -->
+            <article class="lab-card lab-tile">
+                <div class="chip" data-i18n="tile4Chip">NLP · AI</div>
+                <h3 data-i18n="tile4Title">Sentiment & Emotion Analysis</h3>
+                <p data-i18n="tile4Desc">Real-time text processing using BERT transformers directly in your browser.</p>
+                <div class="tile-actions">
+                    <a class="pill primary" href="./project4/index.html" data-i18n="openLab">Open Lab</a>
+                </div>
+            </article>
+
+            <!-- Project 5 -->
+            <article class="lab-card lab-tile">
+                <div class="chip" data-i18n="tile5Chip">Analytics · ML</div>
+                <h3 data-i18n="tile5Title">Weather Analytics & Predictor</h3>
+                <p data-i18n="tile5Desc">Predicting meteorological trends using regression models on European data.</p>
+                <div class="tile-actions">
+                    <a class="pill primary" href="./project5/index.html" data-i18n="openLab">Open Lab</a>
+                </div>
+            </article>
+        </div>
+    </div>
+
+    <script src="./assets/site.js"></script>
+</body>
+
+</html>

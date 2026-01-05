@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Analytics Lab | Data Lab</title>
+    <link rel="stylesheet" href="./assets/site.css">
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+    <style>
+        .weather-grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .weather-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .map-wrapper {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background: radial-gradient(circle at center, rgba(167, 139, 250, 0.05) 0%, transparent 70%);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        #globe-canvas {
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+
+        #globe-canvas:active {
+            cursor: grabbing;
+        }
+
+        .marker-label {
+            position: absolute;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(4px);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid var(--primary);
+            pointer-events: none;
+            white-space: nowrap;
+            transform: translate(-50%, -100%);
+            opacity: 0;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            margin-top: -10px;
+        }
+
+        .marker-label.visible {
+            opacity: 1;
+        }
+
+        .chart-panel {
+            padding: 16px;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+        }
+
+        .metric-val {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .prediction-card {
+            background: linear-gradient(135deg, rgba(167, 139, 250, 0.1), rgba(244, 114, 182, 0.05));
+            border: 1px solid rgba(167, 139, 250, 0.2);
+            padding: 24px;
+            text-align: center;
+        }
+
+        #predictionValue {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+            background: linear-gradient(to right, #a78bfa, #f472b6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .trend-canvas {
+            width: 100%;
+            height: 100px;
+            margin-top: 20px;
+        }
+
+        .importance-bar {
+            height: 6px;
+            background: var(--primary);
+            border-radius: 3px;
+            transition: width 0.5s ease-in-out;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        #labels-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body data-lab-name="Data Lab" data-page-name="Weather Analytics" data-home="../index.html">
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <a href="../index.html" class="back-link">
+                    <i data-lucide="arrow-left"></i> Back to Hub
+                </a>
+                <h1 data-i18n="title">Weather Analytics & AI Predictor</h1>
+                <p class="subtitle" data-i18n="subtitle">Analyzing meteorological trends with lightweight regression
+                    models on European historical data.</p>
+            </div>
+        </header>
+
+        <div class="weather-grid">
+            <!-- Left Column: Map & History -->
+            <div class="space-y-20">
+                <div class="map-wrapper" id="map-container">
+                    <canvas id="globe-canvas"></canvas>
+                    <div id="labels-container"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <i data-lucide="history"></i> <span data-i18n="history">Historical Trends (Last 7 Days)</span>
+                    </div>
+                    <div class="chart-panel">
+                        <canvas id="historyChart" style="width: 100%; height: 200px;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Model & Details -->
+            <div class="space-y-20">
+                <div class="card prediction-card">
+                    <div class="card-header" style="border:0; justify-content: center;">
+                        <i data-lucide="zap"></i> <span data-i18n="predict">Next 24h Forecast</span>
+                    </div>
+                    <div id="predictionLabel" style="font-size: 0.85rem; color: var(--text-light);">Predicted
+                        Temperature</div>
+                    <div id="predictionValue">--°C</div>
+                    <div id="predictionConfidence" style="font-size: 0.75rem; color: #10b981;">Model Confidence: 94%
+                    </div>
+                    <button id="btnPredict" class="btn primary" style="width: 100%; margin-top: 15px;">
+                        <i data-lucide="refresh-cw"></i> Run Inference
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <i data-lucide="info"></i> <span data-i18n="details">Current Station: </span> <span
+                            id="currentCity" style="color:var(--primary); margin-left:5px;">Warsaw</span>
+                    </div>
+                    <div class="chart-panel">
+                        <div class="metric-row"><span>Temperature</span> <span class="metric-val"
+                                id="curTemp">--°C</span></div>
+                        <div class="metric-row"><span>Humidity</span> <span class="metric-val" id="curHum">--%</span>
+                        </div>
+                        <div class="metric-row"><span>Pressure</span> <span class="metric-val" id="curPress">--
+                                hPa</span></div>
+                        <div class="metric-row"><span>Wind Speed</span> <span class="metric-val" id="curWind">--
+                                km/h</span></div>
+                        <div class="metric-row"><span>UV Index</span> <span class="metric-val" id="curUV">--</span>
+                        </div>
+                        <div class="metric-row"><span>Precipitation</span> <span class="metric-val" id="curPrecip">--
+                                mm</span></div>
+                        <div class="metric-row"><span>Feels Like</span> <span class="metric-val"
+                                id="curAppTemp">--°C</span></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <i data-lucide="brain"></i> <span data-i18n="weights">Feature Importance</span>
+                    </div>
+                    <div class="chart-panel space-y-12">
+                        <div>
+                            <div class="metric-row"><span>Recent Temp Trend</span> <span
+                                    style="font-size:0.7rem;">42%</span></div>
+                            <div class="importance-bar" style="width: 42%;"></div>
+                        </div>
+                        <div>
+                            <div class="metric-row"><span>Pressure Gradient</span> <span
+                                    style="font-size:0.7rem;">35%</span></div>
+                            <div class="importance-bar" style="width: 35%;"></div>
+                        </div>
+                        <div>
+                            <div class="metric-row"><span>Humidity Level</span> <span
+                                    style="font-size:0.7rem;">18%</span></div>
+                            <div class="importance-bar" style="width: 18%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import createGlobe from 'https://cdn.skypack.dev/cobe';
+        import { weatherData } from './weather_data.js';
+        import { fetchWeatherData } from './weather_service.js';
+        import { predictNext24h, featureImportance } from './prediction_engine.js';
+
+        const translations = {
+            en: {
+                title: 'Weather Analytics & AI Predictor',
+                subtitle: 'Analyzing meteorological trends with lightweight regression models on European historical data.',
+                history: 'Historical Trends (Last 7 Days)',
+                predict: 'Next 24h Forecast',
+                details: 'Current Station:',
+                weights: 'Feature Importance'
+            },
+            pl: {
+                title: 'Analityka Pogodowa i Predyktor AI',
+                subtitle: 'Analiza trendów meteorologicznych za pomocą lekkich modeli regresji na danych z Polski i Europy.',
+                history: 'Trendy Historyczne (Ostatnie 7 Dni)',
+                predict: 'Prognoza na 24h',
+                details: 'Stacja:',
+                weights: 'Wagi Modelu AI'
+            }
+        };
+
+        const app = {
+            lang: 'en',
+            activeCity: 'Warsaw',
+            globe: null,
+            pointerInteracting: null,
+            pointerInteractionMovement: 0,
+            phi: -0.4,
+            theta: 0.3,
+            width: 0,
+
+            init: async () => {
+                app.lang = document.documentElement.getAttribute('lang') || 'en';
+                app.updateTranslations();
+                window.addEventListener('langchange', (e) => {
+                    app.lang = e.detail.lang;
+                    app.updateTranslations();
+                });
+
+                app.initGlobe();
+
+                // Load initial city data
+                await app.selectCity('Warsaw');
+
+                document.getElementById('btnPredict').addEventListener('click', app.runInference);
+                window.addEventListener('resize', app.resize);
+            },
+
+            updateTranslations: () => {
+                const t = translations[app.lang] || translations.en;
+                document.querySelectorAll('[data-i18n]').forEach(el => {
+                    const key = el.getAttribute('data-i18n');
+                    if (t[key]) el.textContent = t[key];
+                });
+            },
+
+            initGlobe: () => {
+                const canvas = document.getElementById('globe-canvas');
+                const markers = Object.entries(weatherData).map(([name, data]) => ({
+                    location: data.location,
+                    size: 0.05,
+                    name: name
+                }));
+
+                app.globe = createGlobe(canvas, {
+                    devicePixelRatio: window.devicePixelRatio,
+                    width: canvas.offsetWidth * window.devicePixelRatio,
+                    height: canvas.offsetHeight * window.devicePixelRatio,
+                    phi: app.phi,
+                    theta: app.theta,
+                    dark: 0,
+                    diffuse: 1.2,
+                    scale: 1,
+                    mapSamples: 16000,
+                    mapBrightness: 6,
+                    baseColor: [1, 1, 1],
+                    markerColor: [1, 0.5, 1],
+                    glowColor: [1, 1, 1],
+                    offset: [0, 0],
+                    markers: markers,
+                    onRender: (state) => {
+                        app.phi += 0.003;
+                        state.phi = app.phi;
+                        state.theta = app.theta;
+                        app.updateLabels(state);
+                    },
+                });
+
+                // Interaction
+                canvas.addEventListener('pointerdown', (e) => {
+                    app.pointerInteracting = e.clientX - app.pointerInteractionMovement;
+                    canvas.style.cursor = 'grabbing';
+                });
+                window.addEventListener('pointermove', (e) => {
+                    if (app.pointerInteracting !== null) {
+                        const delta = e.clientX - app.pointerInteracting;
+                        app.pointerInteractionMovement = delta;
+                        app.phi = delta / 200;
+                    }
+                });
+                window.addEventListener('pointerup', () => {
+                    app.pointerInteracting = null;
+                    canvas.style.cursor = 'grab';
+                });
+
+                app.resize();
+            },
+
+            resize: () => {
+                const canvas = document.getElementById('globe-canvas');
+                app.width = canvas.offsetWidth;
+                if (app.globe) {
+                    app.globe.resize();
+                }
+            },
+
+            updateLabels: (state) => {
+                const container = document.getElementById('labels-container');
+                const canvas = document.getElementById('globe-canvas');
+                const w = canvas.offsetWidth;
+                const h = canvas.offsetHeight;
+
+                Object.entries(weatherData).forEach(([name, data]) => {
+                    const lat = data.location[0];
+                    const lon = data.location[1];
+                    const projected = app.project(lat, lon, w, h, state.phi, state.theta);
+
+                    let label = document.getElementById(`label-${name}`);
+                    if (!label) {
+                        label = document.createElement('div');
+                        label.id = `label-${name}`;
+                        label.className = 'marker-label';
+                        label.innerHTML = `<span>${name}</span>`;
+                        label.style.pointerEvents = 'auto';
+                        label.onclick = () => app.selectCity(name);
+                        container.appendChild(label);
+                    }
+
+                    if (projected && projected.z > 0) {
+                        label.style.left = `${projected.x}px`;
+                        label.style.top = `${projected.y}px`;
+                        label.classList.add('visible');
+                    } else {
+                        label.classList.remove('visible');
+                    }
+                });
+            },
+
+            project: (lat, lon, width, height, phi, theta) => {
+                const r = 1;
+                const latRad = (lat * Math.PI) / 180;
+                const lonRad = (lon * Math.PI) / 180;
+
+                // 3D position
+                const x = r * Math.cos(latRad) * Math.sin(lonRad);
+                const y = r * Math.sin(latRad);
+                const z = r * Math.cos(latRad) * Math.cos(lonRad);
+
+                // Rotate phi (horizontal)
+                const x1 = x * Math.cos(phi) + z * Math.sin(phi);
+                const z1 = -x * Math.sin(phi) + z * Math.cos(phi);
+
+                // Rotate theta (vertical)
+                const y2 = y * Math.cos(theta) - z1 * Math.sin(theta);
+                const z2 = y * Math.sin(theta) + z1 * Math.cos(theta);
+
+                // Simple projection
+                const scale = 1.0;
+                return {
+                    x: (width / 2) + (x1 * width * 0.4 * scale),
+                    y: (height / 2) - (y2 * height * 0.4 * scale),
+                    z: z2
+                };
+            },
+
+            selectCity: async (name) => {
+                app.activeCity = name;
+                document.querySelectorAll('.marker-label').forEach(m => {
+                    m.style.borderColor = m.id === `label-${name}` ? '#fff' : 'var(--primary)';
+                    m.style.boxShadow = m.id === `label-${name}` ? '0 0 15px var(--primary)' : 'none';
+                });
+
+                const cityUpdate = document.getElementById('currentCity');
+                const originalText = cityUpdate.textContent;
+                cityUpdate.textContent = `${name} (Loading...)`;
+
+                try {
+                    const coords = weatherData[name].location;
+                    const data = await fetchWeatherData(coords[0], coords[1]);
+
+                    // Update global state for this city (caching locally for this session)
+                    weatherData[name].history = data.history;
+                    weatherData[name].current = data.current;
+
+                    cityUpdate.textContent = name;
+
+                    document.getElementById('curTemp').textContent = data.current.temp + '°C';
+                    document.getElementById('curHum').textContent = data.current.hum + '%';
+                    document.getElementById('curPress').textContent = data.current.press + ' hPa';
+                    document.getElementById('curWind').textContent = data.current.wind + ' km/h';
+                    document.getElementById('curUV').textContent = data.current.uv;
+                    document.getElementById('curPrecip').textContent = data.current.precip + ' mm';
+                    document.getElementById('curAppTemp').textContent = data.current.appTemp + '°C';
+
+                    document.getElementById('predictionValue').textContent = '--°C';
+
+                    app.drawChart(data.history);
+                    app.flyTo(coords);
+                } catch (err) {
+                    cityUpdate.textContent = `${name} (Error)`;
+                    console.error(err);
+                }
+            },
+
+            flyTo: (location) => {
+                const lat = location[0];
+                const lon = location[1];
+
+                const targetPhi = - (lon * Math.PI / 180);
+                const targetTheta = (lat * Math.PI / 180);
+
+                const startPhi = app.phi;
+                const startTheta = app.theta;
+                const duration = 1500;
+                const start = performance.now();
+
+                const animate = (time) => {
+                    const elapsed = time - start;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const ease = 1 - Math.pow(1 - progress, 3);
+
+                    // Handle phi wrapping for shortest path
+                    let diffPhi = targetPhi - startPhi;
+                    if (diffPhi > Math.PI) diffPhi -= 2 * Math.PI;
+                    if (diffPhi < -Math.PI) diffPhi += 2 * Math.PI;
+
+                    app.phi = startPhi + diffPhi * ease;
+                    app.theta = startTheta + (targetTheta - startTheta) * ease;
+
+                    if (progress < 1) requestAnimationFrame(animate);
+                };
+                requestAnimationFrame(animate);
+            },
+
+            drawChart: (history) => {
+                const canvas = document.getElementById('historyChart');
+                const ctx = canvas.getContext('2d');
+                const w = canvas.width = canvas.offsetWidth;
+                const h = canvas.height = canvas.offsetHeight;
+                const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+
+                ctx.clearRect(0, 0, w, h);
+
+                // Grid
+                ctx.strokeStyle = theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+                ctx.lineWidth = 1;
+                for (let i = 0; i <= 5; i++) {
+                    let y = i * (h / 5);
+                    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+                }
+
+                // Temp Line
+                const padding = 30;
+                const stepX = (w - padding * 2) / 6;
+                const temps = history.map(d => d.temp);
+                const minT = -5, maxT = 20;
+                const scaleY = (val) => h - padding - (val - minT) / (maxT - minT) * (h - padding * 2);
+
+                ctx.beginPath();
+                ctx.strokeStyle = '#a78bfa';
+                ctx.lineWidth = 3;
+                ctx.lineJoin = 'round';
+
+                temps.forEach((t, i) => {
+                    const x = padding + i * stepX;
+                    const y = scaleY(t);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+                ctx.stroke();
+
+                // Points & Labels
+                temps.forEach((t, i) => {
+                    const x = padding + i * stepX;
+                    const y = scaleY(t);
+
+                    // Point
+                    ctx.fillStyle = '#a78bfa';
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = '#a78bfa';
+                    ctx.beginPath();
+                    ctx.arc(x, y, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+
+                    // Date Label
+                    const date = history[i].date ? new Date(history[i].date) : new Date();
+                    const dayLabel = date.toLocaleDateString(app.lang, { weekday: 'short' });
+                    ctx.fillStyle = theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)';
+                    ctx.font = '10px Inter, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(dayLabel, x, h - 5);
+                });
+
+                // Area Gradient
+                ctx.lineTo(padding + 6 * stepX, h - 20);
+                ctx.lineTo(padding, h - 20);
+                ctx.closePath();
+                const grad = ctx.createLinearGradient(0, 0, 0, h);
+                grad.addColorStop(0, 'rgba(167, 139, 250, 0.2)');
+                grad.addColorStop(1, 'rgba(167, 139, 250, 0)');
+                ctx.fillStyle = grad;
+                ctx.fill();
+            },
+
+            runInference: () => {
+                const btn = document.getElementById('btnPredict');
+                const original = btn.innerHTML;
+                btn.innerHTML = '<i data-lucide="refresh-cw" class="spin"></i> Processing...';
+                lucide.createIcons();
+
+                setTimeout(() => {
+                    const history = weatherData[app.activeCity].history;
+                    const result = predictNext24h(history);
+
+                    document.getElementById('predictionValue').textContent = result.value + '°C';
+                    document.getElementById('predictionConfidence').textContent = `Model Confidence: ${Math.round(result.confidence * 100)}%`;
+
+                    // Update Importance Bars
+                    const bars = document.querySelectorAll('.importance-bar');
+                    const metrics = document.querySelectorAll('.metric-row span:last-child');
+
+                    // Indices for weights: 0: Temp Trend, 1: Press, 2: Humidity
+                    const weights = [
+                        featureImportance.tempTrend,
+                        featureImportance.pressureGradient,
+                        featureImportance.humidityLevel
+                    ];
+
+                    bars.forEach((bar, i) => {
+                        if (weights[i]) {
+                            const pct = Math.round(weights[i] * 100);
+                            bar.style.width = pct + '%';
+                            // Find the span with the percentage text (it's the next sibling of the first span in metric-row)
+                            const parent = bar.previousElementSibling;
+                            if (parent && parent.children[1]) {
+                                parent.children[1].textContent = pct + '%';
+                            }
+                        }
+                    });
+
+                    btn.innerHTML = original;
+                    lucide.createIcons();
+                }, 800);
+            }
+        };
+
+        window.onload = app.init;
+    </script>
+    <script src="./assets/site.js"></script>
+</body>
+
+</html>
